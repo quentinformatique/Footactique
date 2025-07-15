@@ -1,0 +1,51 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Visual Studio files
+.vs/
+.vscode/
+*.code-workspace
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core secrets
+secrets.json
+
+# Logs
+*.log
+
+# Publish output
+publish/
+wwwroot/dist/
+wwwroot/node_modules/
+
+# Aspire specific
+**/ServiceDefaults.json
+**/Aspire.*
+**/aspire/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+*.sln.iml
