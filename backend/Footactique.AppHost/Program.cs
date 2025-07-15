@@ -1,10 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.Footactique_ApiService>("apiservice");
+// Ensure the 'AddPostgres' extension method is available and correctly implemented.  
+var postgresServer = builder.AddPostgres("postgreSQLServer").WithPgAdmin();
 
-builder.AddProject<Projects.Footactique_Web>("webfrontend")
-    .WithExternalHttpEndpoints()
-    .WithReference(apiService)
-    .WaitFor(apiService);
+var exampleDatabase = postgresServer.AddDatabase("exampleDB");
+
+builder.AddProject<Projects.Footactique_Api>("web")
+   .WithReference(exampleDatabase);
 
 builder.Build().Run();

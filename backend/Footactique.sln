@@ -1,14 +1,19 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174 d17.12
+VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.AppHost", "Footactique.AppHost\Footactique.AppHost.csproj", "{B72BC64A-C6B2-4AAD-9BBB-CC78C6BC93A9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{81A425DF-FFE5-4956-8012-6CF877C7A79D} = {81A425DF-FFE5-4956-8012-6CF877C7A79D}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.ServiceDefaults", "Footactique.ServiceDefaults\Footactique.ServiceDefaults.csproj", "{24FB68D2-F732-42F0-8422-3002E16FD989}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.ApiService", "Footactique.ApiService\Footactique.ApiService.csproj", "{0F6FE829-580E-432C-A0DD-94301D54DEB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.Api", "Footactique.ApiService\Footactique.Api.csproj", "{0F6FE829-580E-432C-A0DD-94301D54DEB3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.Tests", "Footactique.Tests\Footactique.Tests.csproj", "{442D97A2-6751-4A13-926B-11F3EDA4621A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footactique.Services", "Footactique.Services\Footactique.Services.csproj", "{81A425DF-FFE5-4956-8012-6CF877C7A79D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +37,10 @@ Global
 		{442D97A2-6751-4A13-926B-11F3EDA4621A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{442D97A2-6751-4A13-926B-11F3EDA4621A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{442D97A2-6751-4A13-926B-11F3EDA4621A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81A425DF-FFE5-4956-8012-6CF877C7A79D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81A425DF-FFE5-4956-8012-6CF877C7A79D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81A425DF-FFE5-4956-8012-6CF877C7A79D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81A425DF-FFE5-4956-8012-6CF877C7A79D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
