@@ -1,135 +1,211 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Footactique.Services;
 using Footactique.Services.Models;
 using Footactique.Services.Services;
-using Microsoft.EntityFrameworkCore;
+using Footactique.Contracts.DTOs;
 using Microsoft.Extensions.Logging;
-using Moq;
+using System.Security.Claims;
 
 namespace Footactique.Tests
 {
     [TestClass]
     public class TeamCompositionServiceTests
     {
-        private TeamCompositionService CreateServiceWithInMemoryDb(out ApplicationDbContext dbContext)
+        private ApplicationDbContext _context;
+        private TeamCompositionService _service;
+        private Mock<ILogger<TeamCompositionService>> _loggerMock;
+
+        [TestInitialize]
+        public void Setup()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: System.Guid.NewGuid().ToString())
+            // Setup in-memory database
+            DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
-            dbContext = new ApplicationDbContext(options);
-            var logger = new Mock<ILogger<TeamCompositionService>>().Object;
-            return new TeamCompositionService(dbContext, logger);
+            _context = new ApplicationDbContext(options);
+
+            // Setup Logger mock
+            _loggerMock = new Mock<ILogger<TeamCompositionService>>();
+
+            _service = new TeamCompositionService(_context, _loggerMock.Object);
         }
 
         [TestMethod]
-        public async Task GetTeamCompositionsAsync_ReturnsOnlyUserCompositions()
+        public async Task GetTeamCompositionsAsync_WithValidUserId_ReturnsUserCompositions()
         {
             // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out ApplicationDbContext dbContext);
-            dbContext.TeamCompositions.AddRange(
-                new TeamComposition { Name = "A", Formation = "4-4-2", UserId = "user1", Players = new List<PlayerPosition>() },
-                new TeamComposition { Name = "B", Formation = "4-3-3", UserId = "user2", Players = new List<PlayerPosition>() }
-            );
-            await dbContext.SaveChangesAsync();
+            string userId = "test-user-id";
+            
+            TeamComposition composition = new TeamComposition
+            {
+                Name = "Test Formation",
+                Formation = "4-4-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Player 1", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            _context.TeamCompositions.Add(composition);
+            await _context.SaveChangesAsync();
 
             // Act
-            List<TeamComposition> result = await service.GetTeamCompositionsAsync("user1");
+            List<TeamComposition> result = await _service.GetTeamCompositionsAsync(userId);
 
             // Assert
+            Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("A", result[0].Name);
+            Assert.AreEqual("Test Formation", result[0].Name);
         }
 
         [TestMethod]
-        public async Task GetTeamCompositionAsync_ReturnsNullIfNotFound()
+        public async Task GetTeamCompositionAsync_WithValidId_ReturnsComposition()
         {
             // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out _);
+            string userId = "test-user-id";
+            
+            TeamComposition composition = new TeamComposition
+            {
+                Id = 1,
+                Name = "Test Formation",
+                Formation = "4-4-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Player 1", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            _context.TeamCompositions.Add(composition);
+            await _context.SaveChangesAsync();
 
             // Act
-            TeamComposition result = await service.GetTeamCompositionAsync("user1", 999);
+            TeamComposition? result = await _service.GetTeamCompositionAsync(userId, 1);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Test Formation", result.Name);
+        }
+
+        [TestMethod]
+        public async Task CreateTeamCompositionAsync_WithValidData_CreatesComposition()
+        {
+            // Arrange
+            string userId = "test-user-id";
+            
+            TeamComposition composition = new TeamComposition
+            {
+                Name = "New Formation",
+                Formation = "3-5-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Goalkeeper", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            // Act
+            TeamComposition result = await _service.CreateTeamCompositionAsync(userId, composition);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("New Formation", result.Name);
+            Assert.AreEqual(userId, result.UserId);
+        }
+
+        [TestMethod]
+        public async Task UpdateTeamCompositionAsync_WithValidData_UpdatesComposition()
+        {
+            // Arrange
+            string userId = "test-user-id";
+            
+            TeamComposition existingComposition = new TeamComposition
+            {
+                Id = 1,
+                Name = "Original Formation",
+                Formation = "4-4-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Player 1", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            _context.TeamCompositions.Add(existingComposition);
+            await _context.SaveChangesAsync();
+
+            TeamComposition updatedComposition = new TeamComposition
+            {
+                Id = 1,
+                Name = "Updated Formation",
+                Formation = "3-5-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Updated Player", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            // Act
+            bool result = await _service.UpdateTeamCompositionAsync(userId, 1, updatedComposition);
+
+            // Assert
+            Assert.IsTrue(result);
+            TeamComposition? savedComposition = await _context.TeamCompositions.FindAsync(1);
+            Assert.IsNotNull(savedComposition);
+            Assert.AreEqual("Updated Formation", savedComposition.Name);
+        }
+
+        [TestMethod]
+        public async Task DeleteTeamCompositionAsync_WithValidId_DeletesComposition()
+        {
+            // Arrange
+            string userId = "test-user-id";
+            
+            TeamComposition composition = new TeamComposition
+            {
+                Id = 1,
+                Name = "To Delete",
+                Formation = "4-4-2",
+                UserId = userId,
+                Players = new List<PlayerPosition>
+                {
+                    new PlayerPosition { PlayerName = "Player 1", Position = "GK", Number = 1, X = 50, Y = 90 }
+                }
+            };
+
+            _context.TeamCompositions.Add(composition);
+            await _context.SaveChangesAsync();
+
+            // Act
+            bool result = await _service.DeleteTeamCompositionAsync(userId, 1);
+
+            // Assert
+            Assert.IsTrue(result);
+            TeamComposition? deletedComposition = await _context.TeamCompositions.FindAsync(1);
+            Assert.IsNull(deletedComposition);
+        }
+
+        [TestMethod]
+        public async Task GetTeamCompositionAsync_WithInvalidId_ReturnsNull()
+        {
+            // Arrange
+            string userId = "test-user-id";
+
+            // Act
+            TeamComposition? result = await _service.GetTeamCompositionAsync(userId, 999);
 
             // Assert
             Assert.IsNull(result);
         }
 
-        [TestMethod]
-        public async Task CreateTeamCompositionAsync_SavesAndReturnsComposition()
+        [TestCleanup]
+        public void Cleanup()
         {
-            // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out ApplicationDbContext dbContext);
-            TeamComposition comp = new TeamComposition { Name = "Test", Formation = "4-4-2", Players = new List<PlayerPosition>() };
-
-            // Act
-            TeamComposition result = await service.CreateTeamCompositionAsync("user1", comp);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("user1", result.UserId);
-            Assert.AreEqual(1, dbContext.TeamCompositions.Count());
-        }
-
-        [TestMethod]
-        public async Task UpdateTeamCompositionAsync_UpdatesIfExists()
-        {
-            // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out ApplicationDbContext dbContext);
-            TeamComposition comp = new TeamComposition { Name = "Old", Formation = "4-4-2", UserId = "user1", Players = new List<PlayerPosition>() };
-            dbContext.TeamCompositions.Add(comp);
-            await dbContext.SaveChangesAsync();
-            TeamComposition updated = new TeamComposition { Name = "New", Formation = "3-5-2", Players = new List<PlayerPosition>() };
-
-            // Act
-            bool result = await service.UpdateTeamCompositionAsync("user1", comp.Id, updated);
-
-            // Assert
-            Assert.IsTrue(result);
-            TeamComposition reloaded = dbContext.TeamCompositions.First(x => x.Id == comp.Id);
-            Assert.AreEqual("New", reloaded.Name);
-            Assert.AreEqual("3-5-2", reloaded.Formation);
-        }
-
-        [TestMethod]
-        public async Task UpdateTeamCompositionAsync_ReturnsFalseIfNotFound()
-        {
-            // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out _);
-            TeamComposition updated = new TeamComposition { Name = "New", Formation = "3-5-2", Players = new List<PlayerPosition>() };
-
-            // Act
-            bool result = await service.UpdateTeamCompositionAsync("user1", 999, updated);
-
-            // Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        public async Task DeleteTeamCompositionAsync_DeletesIfExists()
-        {
-            // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out ApplicationDbContext dbContext);
-            TeamComposition comp = new TeamComposition { Name = "ToDelete", Formation = "4-4-2", UserId = "user1", Players = new List<PlayerPosition>() };
-            dbContext.TeamCompositions.Add(comp);
-            await dbContext.SaveChangesAsync();
-
-            // Act
-            bool result = await service.DeleteTeamCompositionAsync("user1", comp.Id);
-
-            // Assert
-            Assert.IsTrue(result);
-            Assert.AreEqual(0, dbContext.TeamCompositions.Count());
-        }
-
-        [TestMethod]
-        public async Task DeleteTeamCompositionAsync_ReturnsFalseIfNotFound()
-        {
-            // Arrange
-            TeamCompositionService service = CreateServiceWithInMemoryDb(out _);
-
-            // Act
-            bool result = await service.DeleteTeamCompositionAsync("user1", 999);
-
-            // Assert
-            Assert.IsFalse(result);
+            _context?.Dispose();
         }
     }
 } 

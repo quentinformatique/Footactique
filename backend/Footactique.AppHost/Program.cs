@@ -1,13 +1,8 @@
-var builder = DistributedApplication.CreateBuilder(args);
+using Aspire.Hosting;
 
-// --- Database ---
-var postgresServer = builder.AddPostgres("postgreSQLServer").WithPgAdmin();
-var appDatabase = postgresServer.AddDatabase("footactique");
+IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-// --- API Service ---
-var api = builder.AddProject<Projects.Footactique_Api>("web")
-    .WithReference(appDatabase)
-    .WaitFor(postgresServer)
-    .WaitFor(appDatabase);
+// Add the API service
+IResourceBuilder<ProjectResource> api = builder.AddProject<Projects.Footactique_Api>("web");
 
 builder.Build().Run();

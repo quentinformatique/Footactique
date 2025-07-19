@@ -1,4 +1,4 @@
-namespace Footactique.Api.DTOs
+namespace Footactique.Contracts.DTOs
 {
     /// <summary>
     /// Data Transfer Object for creating a team composition.
@@ -8,16 +8,16 @@ namespace Footactique.Api.DTOs
         /// <summary>
         /// Name of the team composition.
         /// </summary>
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         /// Formation string (e.g., "4-3-3").
         /// </summary>
-        public string Formation { get; set; }
+        public required string Formation { get; set; }
 
         /// <summary>
         /// List of player positions in this composition.
         /// </summary>
-        public List<CreatePlayerPositionDto> Players { get; set; }
+        public required List<CreatePlayerPositionDto> Players { get; set; }
     }
-}
+} 

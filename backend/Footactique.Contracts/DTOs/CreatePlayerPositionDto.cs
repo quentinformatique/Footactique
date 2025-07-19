@@ -1,24 +1,19 @@
-namespace Footactique.Api.DTOs
+namespace Footactique.Contracts.DTOs
 {
     /// <summary>
-    /// Data Transfer Object for reading a player position.
+    /// Data Transfer Object for creating or updating a player position.
     /// </summary>
-    public class PlayerPositionDto
+    public class CreatePlayerPositionDto
     {
-        /// <summary>
-        /// Player position ID.
-        /// </summary>
-        public int Id { get; set; }
-
         /// <summary>
         /// Name of the player.
         /// </summary>
-        public string PlayerName { get; set; }
+        public required string PlayerName { get; set; }
 
         /// <summary>
         /// Position label (e.g., "Left Winger").
         /// </summary>
-        public string Position { get; set; }
+        public required string Position { get; set; }
 
         /// <summary>
         /// Player's jersey number (optional).
@@ -35,4 +30,4 @@ namespace Footactique.Api.DTOs
         /// </summary>
         public float Y { get; set; }
     }
-}
+} 

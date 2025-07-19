@@ -1,105 +1,156 @@
 using Footactique.Services;
-using Microsoft.EntityFrameworkCore;
+using Footactique.Services.Models;
 using Footactique.Services.Services;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Logs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace Footactique.Api
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            // Add service defaults & Aspire client integrations.  
-            builder.AddServiceDefaults();
-            Console.WriteLine(builder.Configuration.GetConnectionString("footactique"));
+            // Add services to the container
+            builder.Services.AddControllers();
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-               options.UseNpgsql(builder.Configuration.GetConnectionString("footactique")
-                   ?? throw new InvalidOperationException("Connection string 'postgresdb' not found.")));
+            // Configure environment-specific database
+            string envName = builder.Environment.EnvironmentName;
+            bool isDevelopment = envName == "Development" || envName == "Testing";
 
-            // --- OpenTelemetry configuration ---
-            // Enable OpenTelemetry only if not running under Aspire/local dev
-            var env = builder.Environment.EnvironmentName;
-            var isAspire = builder.Configuration["ASPIRE_ENABLED"] == "true";
-            if (!isAspire && env != "Development")
+            if (isDevelopment)
             {
-                string serviceName = "Footactique.ApiService";
-                builder.Services.AddOpenTelemetry()
-                    .ConfigureResource(resource => resource.AddService(serviceName))
-                    .WithTracing(tracing => tracing
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddSqlClientInstrumentation()
-                    )
-                    .WithMetrics(metrics => metrics
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddRuntimeInstrumentation()
-                    );
+                // Use in-memory database for development and testing
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseInMemoryDatabase("FootactiqueDb"));
             }
-            // --- End OpenTelemetry configuration ---
+            else
+            {
+                // Use PostgreSQL for production
+                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(connectionString));
+            }
+
+            // Configure Identity
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            // Configure JWT Authentication
+            string jwtKey = builder.Configuration["Jwt:Key"] ?? "dev_secret_key_1234567890";
+            string jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Footactique";
+            
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                };
+            });
+
+            // Configure authorization
+            builder.Services.AddAuthorization();
 
             // Register business services
             builder.Services.AddScoped<ITeamCompositionService, TeamCompositionService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             // Add MVC controllers
             builder.Services.AddControllers();
 
-            // Add services to the container.  
-            builder.Services.AddProblemDetails();
-
-            // --- Swagger/OpenAPI configuration ---
+            // Configure Swagger/OpenAPI
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(options =>
+            builder.Services.AddSwaggerGen(c =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Footactique API",
+                c.SwaggerDoc("v1", new OpenApiInfo 
+                { 
+                    Title = "Footactique API", 
                     Version = "v1",
-                    Description = "API for managing football team compositions (SaaS)",
+                    Description = "API for managing football team compositions. All new users are automatically assigned the 'user' role. Admin users can create additional admin users through the hidden create-admin endpoint."
                 });
-                // Optionally, add security, XML comments, etc.
-            });
-            // --- End Swagger/OpenAPI configuration ---
 
-            var app = builder.Build();
-
-            // --- Apply EF Core migrations automatically in Development ---
-            if (app.Environment.IsDevelopment())
-            {
-                using (var scope = app.Services.CreateScope())
+                // Add JWT Bearer authentication
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    db.Database.Migrate();
-                }
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
+            // Check if running in Aspire context
+            bool isAspire = builder.Configuration["ASPIRE_ENABLED"] == "true";
+            if (isAspire)
+            {
+                // Add Aspire service defaults
+                builder.AddServiceDefaults();
             }
-            // --- End auto-migration ---
 
-            // Configure the HTTP request pipeline.  
-            app.UseExceptionHandler();
+            WebApplication app = builder.Build();
 
-            // Enable Swagger UI and OpenAPI only in Development
+            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(options =>
+                app.UseSwaggerUI(c =>
                 {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Footactique API v1");
-                    options.RoutePrefix = string.Empty; // Swagger UI at root
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Footactique API v1");
+                    c.RoutePrefix = "swagger";
                 });
-                app.MapOpenApi();
             }
 
-            // Map controller endpoints for API
+            // Redirect root to Swagger UI only in development
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapGet("/", () => Results.Redirect("/swagger"))
+                   .ExcludeFromDescription(); // Hide from Swagger documentation
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
 
-            app.MapDefaultEndpoints();
+            // Ensure database is created
+            using (IServiceScope scope = app.Services.CreateScope())
+            {
+                ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.EnsureCreated();
+            }
 
             app.Run();
         }

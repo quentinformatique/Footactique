@@ -23,7 +23,7 @@ namespace Footactique.Services.Models
         public string Formation { get; set; }
 
         /// <summary>
-        /// OIDC User ID (subject) who owns this composition.
+        /// The ID of the user who owns this team composition.
         /// </summary>
         public string UserId { get; set; }
 
