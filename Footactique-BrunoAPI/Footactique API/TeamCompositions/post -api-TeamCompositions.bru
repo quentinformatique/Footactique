@@ -1,0 +1,27 @@
+meta {
+  name: post /api/TeamCompositions
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/TeamCompositions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "",
+    "formation": "",
+    "players": [
+      {
+        "playerName": "",
+        "position": "",
+        "number": "",
+        "x": "",
+        "y": ""
+      }
+    ]
+  }
+}
