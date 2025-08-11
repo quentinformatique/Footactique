@@ -50,6 +50,7 @@ namespace Footactique.Api.Controllers
                     PlayerName = p.PlayerName,
                     Position = p.Position,
                     Number = p.Number,
+                    Color = p.Color,
                     X = p.X,
                     Y = p.Y
                 }).ToList()
@@ -99,6 +100,7 @@ namespace Footactique.Api.Controllers
                     PlayerName = p.PlayerName,
                     Position = p.Position,
                     Number = p.Number,
+                    Color = p.Color,
                     X = p.X,
                     Y = p.Y
                 }).ToList()
@@ -139,6 +141,7 @@ namespace Footactique.Api.Controllers
                     PlayerName = p.PlayerName,
                     Position = p.Position,
                     Number = p.Number,
+                    Color = p.Color,
                     X = p.X,
                     Y = p.Y
                 }).ToList()
@@ -158,6 +161,7 @@ namespace Footactique.Api.Controllers
                     PlayerName = p.PlayerName,
                     Position = p.Position,
                     Number = p.Number,
+                    Color = p.Color,
                     X = p.X,
                     Y = p.Y
                 }).ToList()
@@ -201,6 +205,7 @@ namespace Footactique.Api.Controllers
                     PlayerName = p.PlayerName,
                     Position = p.Position,
                     Number = p.Number,
+                    Color = p.Color,
                     X = p.X,
                     Y = p.Y
                 }).ToList()

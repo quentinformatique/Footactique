@@ -23,6 +23,16 @@ namespace Footactique.Services.Models
         public string Formation { get; set; }
 
         /// <summary>
+        /// Description of the team composition (optional).
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Whether this composition is marked as favorite.
+        /// </summary>
+        public bool IsFavorite { get; set; }
+
+        /// <summary>
         /// The ID of the user who owns this team composition.
         /// </summary>
         public string UserId { get; set; }
@@ -31,5 +41,15 @@ namespace Footactique.Services.Models
         /// List of player positions in this composition.
         /// </summary>
         public List<PlayerPosition> Players { get; set; }
+
+        /// <summary>
+        /// Creation date of the composition.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Last update date of the composition.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; }
     }
 } 

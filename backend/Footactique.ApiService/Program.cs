@@ -16,27 +16,23 @@ namespace Footactique.Api
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container
-            builder.Services.AddControllers();
-
-            // Configure environment-specific database
-            string envName = builder.Environment.EnvironmentName;
-            bool isDevelopment = envName == "Development" || envName == "Testing";
-
-            if (isDevelopment)
+            // Configure CORS
+            builder.Services.AddCors(options =>
             {
-                // Use in-memory database for development and testing
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseInMemoryDatabase("FootactiqueDb"));
-            }
-            else
-            {
-                // Use PostgreSQL for production
-                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(connectionString));
-            }
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "*")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
+            // Use PostgreSQL for production
+            string connectionString = builder.Configuration.GetConnectionString("footactique") 
+                ?? throw new InvalidOperationException("Connection string 'footactique' not found.");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString));
 
             // Configure Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -73,7 +69,8 @@ namespace Footactique.Api
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             // Add MVC controllers
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddApplicationPart(typeof(Program).Assembly);
 
             // Configure Swagger/OpenAPI
             builder.Services.AddEndpointsApiExplorer();
@@ -141,17 +138,13 @@ namespace Footactique.Api
             }
 
             app.UseHttpsRedirection();
+            
+            // Use CORS
+            app.UseCors("AllowFrontend");
+            
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-
-            // Ensure database is created
-            using (IServiceScope scope = app.Services.CreateScope())
-            {
-                ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.EnsureCreated();
-            }
-
             app.Run();
         }
     }

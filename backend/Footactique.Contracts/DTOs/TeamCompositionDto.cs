@@ -21,8 +21,28 @@ namespace Footactique.Contracts.DTOs
         public required string Formation { get; set; }
 
         /// <summary>
+        /// Description of the team composition (optional).
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Whether this composition is marked as favorite.
+        /// </summary>
+        public bool IsFavorite { get; set; }
+
+        /// <summary>
         /// List of player positions in this composition.
         /// </summary>
         public required List<PlayerPositionDto> Players { get; set; }
+
+        /// <summary>
+        /// Creation date of the composition.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Last update date of the composition.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; }
     }
 } 

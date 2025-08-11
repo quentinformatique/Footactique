@@ -29,5 +29,20 @@ namespace Footactique.Services.Services
         /// Refreshes a JWT using a valid refresh token.
         /// </summary>
         Task<(string Jwt, string RefreshToken, bool Success, string? ErrorMessage)> RefreshTokenAsync(string refreshToken);
+
+        /// <summary>
+        /// Gets the current user's profile information.
+        /// </summary>
+        Task<UserProfileDto?> GetUserProfileAsync(string userId);
+
+        /// <summary>
+        /// Updates the current user's profile information.
+        /// </summary>
+        Task<IdentityResult> UpdateUserProfileAsync(string userId, UpdateUserDto dto);
+
+        /// <summary>
+        /// Generates a new JWT token for the specified user.
+        /// </summary>
+        Task<string> GenerateNewTokenAsync(string userId);
     }
 } 

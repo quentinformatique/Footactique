@@ -7,10 +7,7 @@ namespace Footactique.Services.Models
     /// </summary>
     public class ApplicationUser : IdentityUser
     {
-        // Ajoute ici des propriétés personnalisées si besoin (ex: prénom, nom, etc.)
-        // /// <summary>
-        // /// User's first name.
-        // /// </summary>
-        // public string FirstName { get; set; }
+        // Utilise les propriétés par défaut d'IdentityUser
+        // UserName, Email, etc. sont déjà disponibles
     }
 } 

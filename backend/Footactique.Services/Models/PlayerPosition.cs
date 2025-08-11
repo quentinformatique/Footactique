@@ -31,6 +31,11 @@ namespace Footactique.Services.Models
         public int? Number { get; set; }
 
         /// <summary>
+        /// Player's color on the field (hex color code).
+        /// </summary>
+        public string? Color { get; set; }
+
+        /// <summary>
         /// X coordinate on the field (normalized, 0.0 = left, 1.0 = right).
         /// </summary>
         public float X { get; set; }

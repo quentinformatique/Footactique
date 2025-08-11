@@ -6,6 +6,11 @@ namespace Footactique.Contracts.DTOs
     public class RegisterDto
     {
         /// <summary>
+        /// User username.
+        /// </summary>
+        public required string Username { get; set; }
+
+        /// <summary>
         /// User email address.
         /// </summary>
         public required string Email { get; set; }
