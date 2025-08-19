@@ -78,6 +78,8 @@ namespace Footactique.Services.Services
                 }
                 existing.Name = updatedComposition.Name;
                 existing.Formation = updatedComposition.Formation;
+                existing.Description = updatedComposition.Description;
+                existing.IsFavorite = updatedComposition.IsFavorite;
                 context.PlayerPositions.RemoveRange(existing.Players);
                 existing.Players = updatedComposition.Players;
                 await context.SaveChangesAsync();

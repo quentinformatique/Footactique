@@ -6,6 +6,7 @@ import { TeamComposition, PlayerPosition } from '../types/api';
 import Navigation from './Navigation';
 import FootballField from './FootballField';
 import PlayerPanel from './PlayerPanel';
+import { PdfExportService } from '../services/pdfExport';
 
 const CompositionEditor: React.FC = () => {
   const navigate = useNavigate();
@@ -65,9 +66,13 @@ const CompositionEditor: React.FC = () => {
     }
   };
 
-  const handleExport = () => {
-    // TODO: Implémenter l'export
-    alert('Fonctionnalité d\'export à venir');
+  const handleExport = async () => {
+    try {
+      await PdfExportService.exportCompositionAsPdf(composition);
+    } catch (error) {
+      console.error('Erreur lors de l\'export PDF:', error);
+      alert('Erreur lors de l\'export PDF');
+    }
   };
 
   const handlePlayerMove = (playerId: number, x: number, y: number) => {

@@ -1,48 +1,48 @@
 namespace Footactique.Contracts.DTOs
 {
     /// <summary>
-    /// Data Transfer Object for reading a team composition.
+    /// DTO pour la lecture d'une composition d'équipe.
     /// </summary>
     public class TeamCompositionDto
     {
         /// <summary>
-        /// Team composition ID.
+        /// Identifiant de la composition.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Name of the team composition.
+        /// Nom de la composition.
         /// </summary>
         public required string Name { get; set; }
 
         /// <summary>
-        /// Formation string (e.g., "4-3-3").
+        /// Formation (ex. « 4-3-3 »).
         /// </summary>
         public required string Formation { get; set; }
 
         /// <summary>
-        /// Description of the team composition (optional).
+        /// Description de la composition (optionnel).
         /// </summary>
         public string? Description { get; set; }
 
         /// <summary>
-        /// Whether this composition is marked as favorite.
+        /// Indique si la composition est favorite.
         /// </summary>
         public bool IsFavorite { get; set; }
 
         /// <summary>
-        /// List of player positions in this composition.
+        /// Liste des positions des joueurs.
         /// </summary>
         public required List<PlayerPositionDto> Players { get; set; }
 
         /// <summary>
-        /// Creation date of the composition.
+        /// Date de création.
         /// </summary>
         public DateTime CreatedAt { get; set; }
 
         /// <summary>
-        /// Last update date of the composition.
+        /// Date de dernière mise à jour.
         /// </summary>
         public DateTime UpdatedAt { get; set; }
     }
-} 
+}

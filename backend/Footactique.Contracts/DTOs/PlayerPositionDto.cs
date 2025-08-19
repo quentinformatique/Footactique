@@ -1,43 +1,43 @@
 namespace Footactique.Contracts.DTOs
 {
     /// <summary>
-    /// Data Transfer Object for reading a player position.
+    /// DTO pour la lecture d'une position de joueur.
     /// </summary>
     public class PlayerPositionDto
     {
         /// <summary>
-        /// Player position ID.
+        /// Identifiant de la position du joueur.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Name of the player.
+        /// Nom du joueur.
         /// </summary>
         public required string PlayerName { get; set; }
 
         /// <summary>
-        /// Position label (e.g., "Left Winger").
+        /// Libellé de la position (ex. « Ailier gauche »).
         /// </summary>
         public required string Position { get; set; }
 
         /// <summary>
-        /// Player's jersey number (optional).
+        /// Numéro de maillot (optionnel).
         /// </summary>
         public int? Number { get; set; }
 
         /// <summary>
-        /// Player's color on the field (hex color code).
+        /// Couleur du joueur sur le terrain (code hexadécimal).
         /// </summary>
         public string? Color { get; set; }
 
         /// <summary>
-        /// X coordinate on the field (normalized, 0.0 = left, 1.0 = right).
+        /// Coordonnée X (normalisée, 0.0 = gauche, 1.0 = droite).
         /// </summary>
         public float X { get; set; }
 
         /// <summary>
-        /// Y coordinate on the field (normalized, 0.0 = bottom, 1.0 = top).
+        /// Coordonnée Y (normalisée, 0.0 = bas, 1.0 = haut).
         /// </summary>
         public float Y { get; set; }
     }
-} 
+}

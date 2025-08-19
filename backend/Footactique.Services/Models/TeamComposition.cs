@@ -3,53 +3,53 @@ using System.Collections.Generic;
 namespace Footactique.Services.Models
 {
     /// <summary>
-    /// Represents a football team composition (lineup) for a user.
+    /// Représente une composition d'équipe (onze) pour un utilisateur.
     /// </summary>
     public class TeamComposition
     {
         /// <summary>
-        /// Primary key.
+        /// Clé primaire.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Name of the team composition (e.g., "My 4-3-3 Lineup").
+        /// Nom de la composition (ex. « Mon 4-3-3 »).
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Formation string (e.g., "4-3-3").
+        /// Formation (ex. « 4-3-3 »).
         /// </summary>
         public string Formation { get; set; }
 
         /// <summary>
-        /// Description of the team composition (optional).
+        /// Description de la composition (optionnel).
         /// </summary>
         public string? Description { get; set; }
 
         /// <summary>
-        /// Whether this composition is marked as favorite.
+        /// Indique si la composition est marquée comme favorite.
         /// </summary>
         public bool IsFavorite { get; set; }
 
         /// <summary>
-        /// The ID of the user who owns this team composition.
+        /// Identifiant de l'utilisateur propriétaire de cette composition.
         /// </summary>
         public string UserId { get; set; }
 
         /// <summary>
-        /// List of player positions in this composition.
+        /// Liste des positions des joueurs dans cette composition.
         /// </summary>
         public List<PlayerPosition> Players { get; set; }
 
         /// <summary>
-        /// Creation date of the composition.
+        /// Date de création de la composition.
         /// </summary>
         public DateTime CreatedAt { get; set; }
 
         /// <summary>
-        /// Last update date of the composition.
+        /// Date de dernière mise à jour de la composition.
         /// </summary>
         public DateTime UpdatedAt { get; set; }
     }
-} 
+}

@@ -44,6 +44,8 @@ namespace Footactique.Api.Controllers
                 Id = c.Id,
                 Name = c.Name,
                 Formation = c.Formation,
+                Description = c.Description,
+                IsFavorite = c.IsFavorite,
                 Players = c.Players.Select(p => new PlayerPositionDto
                 {
                     Id = p.Id,
@@ -94,6 +96,8 @@ namespace Footactique.Api.Controllers
                 Id = composition.Id,
                 Name = composition.Name,
                 Formation = composition.Formation,
+                Description = composition.Description,
+                IsFavorite = composition.IsFavorite,
                 Players = composition.Players.Select(p => new PlayerPositionDto
                 {
                     Id = p.Id,
@@ -136,6 +140,8 @@ namespace Footactique.Api.Controllers
             {
                 Name = dto.Name,
                 Formation = dto.Formation,
+                Description = dto.Description,
+                IsFavorite = dto.IsFavorite,
                 Players = dto.Players.Select(p => new PlayerPosition
                 {
                     PlayerName = p.PlayerName,
@@ -155,6 +161,8 @@ namespace Footactique.Api.Controllers
                 Id = created.Id,
                 Name = created.Name,
                 Formation = created.Formation,
+                Description = created.Description,
+                IsFavorite = created.IsFavorite,
                 Players = created.Players.Select(p => new PlayerPositionDto
                 {
                     Id = p.Id,
@@ -200,6 +208,8 @@ namespace Footactique.Api.Controllers
             {
                 Name = dto.Name,
                 Formation = dto.Formation,
+                Description = dto.Description,
+                IsFavorite = dto.IsFavorite,
                 Players = dto.Players.Select(p => new PlayerPosition
                 {
                     PlayerName = p.PlayerName,
