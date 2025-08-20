@@ -26,7 +26,7 @@ const CompositionViewer: React.FC = () => {
           const data = await apiService.getTeamComposition(parseInt(id));
           setComposition(data);
         } catch (error) {
-          console.error('Erreur lors du chargement de la composition:', error);
+          
           navigate('/dashboard');
         } finally {
           setLoading(false);
@@ -40,7 +40,7 @@ const CompositionViewer: React.FC = () => {
     try {
       await PdfExportService.exportCompositionAsPdf(composition);
     } catch (error) {
-      console.error('Erreur lors de l\'export PDF:', error);
+      
       alert('Erreur lors de l\'export PDF');
     }
   };

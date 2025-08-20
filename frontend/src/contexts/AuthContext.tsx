@@ -47,7 +47,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: decoded.email
       };
     } catch (error) {
-      console.error('Erreur lors du décodage du token:', error);
       return null;
     }
   };
@@ -103,22 +102,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('AuthContext: Tentative de connexion...');
       const response = await apiService.login({ email, password });
-      console.log('AuthContext: Réponse reçue du serveur');
       
       localStorage.setItem('token', response.token);
       localStorage.setItem('refreshToken', response.refreshToken);
       
       const userData = decodeToken(response.token);
       if (userData) {
-        console.log('AuthContext: Utilisateur décodé:', userData);
         setUser(userData);
       } else {
         throw new Error('Token invalide reçu du serveur');
       }
     } catch (error) {
-      console.error('AuthContext: Erreur lors de la connexion:', error);
       throw error;
     }
   };

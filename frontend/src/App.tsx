@@ -10,13 +10,10 @@ import DashboardPage from './components/DashboardPage';
 import CompositionEditor from './components/CompositionEditor';
 import CompositionViewer from './components/CompositionViewer';
 import UserProfilePage from './components/UserProfilePage';
-import ProfilePage from './components/ProfilePage';
 
 // Composant pour protéger les routes authentifiées
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-
-  console.log('ProtectedRoute: loading=', loading, 'isAuthenticated=', isAuthenticated);
 
   if (loading) {
     return (

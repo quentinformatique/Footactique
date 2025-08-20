@@ -33,7 +33,7 @@ const CompositionEditor: React.FC = () => {
           setComposition(data);
           setCompositionExists(true);
         } catch (error) {
-          console.error('Erreur lors du chargement de la composition:', error);
+          
           // Si la composition n'existe pas, on reste en mode création
           setCompositionExists(false);
         } finally {
@@ -59,7 +59,7 @@ const CompositionEditor: React.FC = () => {
       }
       navigate('/dashboard');
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      
       alert('Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);
@@ -70,7 +70,7 @@ const CompositionEditor: React.FC = () => {
     try {
       await PdfExportService.exportCompositionAsPdf(composition);
     } catch (error) {
-      console.error('Erreur lors de l\'export PDF:', error);
+      
       alert('Erreur lors de l\'export PDF');
     }
   };

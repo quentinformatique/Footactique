@@ -21,7 +21,11 @@ namespace Footactique.Api
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "*")
+                    // Get allowed origins from configuration for security
+                    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+                        ?? new[] { "http://localhost:3000", "https://localhost:3000" };
+                    
+                    policy.WithOrigins(allowedOrigins)
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials();
@@ -40,7 +44,8 @@ namespace Footactique.Api
                 .AddDefaultTokenProviders();
 
             // Configure JWT Authentication
-            string jwtKey = builder.Configuration["Jwt:Key"] ?? "dev_secret_key_1234567890";
+            string jwtKey = builder.Configuration["Jwt:Key"] 
+                ?? throw new InvalidOperationException("JWT Key must be configured for production deployment.");
             string jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Footactique";
             
             builder.Services.AddAuthentication(options =>

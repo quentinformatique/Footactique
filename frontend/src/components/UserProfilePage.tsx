@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff, Save, User, Mail, Lock } from 'lucide-react';
 import { apiService } from '../services/api';
@@ -25,11 +25,7 @@ const UserProfilePage: React.FC = () => {
   const { logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
       const userProfile = await apiService.getUserProfile();
@@ -37,7 +33,6 @@ const UserProfilePage: React.FC = () => {
       setUsername(userProfile.username);
       setEmail(userProfile.email);
     } catch (err: any) {
-      console.error('Erreur lors du chargement du profil:', err);
       setError('Impossible de charger le profil utilisateur');
       if (err.response?.status === 401) {
         logout();
@@ -46,7 +41,11 @@ const UserProfilePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout, navigate]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

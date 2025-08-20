@@ -77,28 +77,21 @@ class ApiService {
 
   // Auth endpoints
   async register(data: RegisterDto): Promise<{ message: string }> {
-    console.log('API: Tentative d\'inscription avec:', { email: data.email, username: data.username });
     const response = await this.api.post('/auth/register', data);
-    console.log('API: Inscription réussie');
     return response.data;
   }
 
   async login(data: LoginDto): Promise<AuthResponse> {
-    console.log('API: Tentative de connexion avec:', { email: data.email });
     try {
       const response = await this.api.post('/auth/login', data);
-      console.log('API: Connexion réussie, token reçu');
       return response.data;
     } catch (error: any) {
-      console.error('API: Erreur de connexion:', error.response?.status, error.response?.data);
       throw error;
     }
   }
 
   async refreshToken(data: RefreshTokenRequest): Promise<AuthResponse> {
-    console.log('API: Tentative de refresh token');
     const response = await this.api.post('/auth/refresh', data);
-    console.log('API: Refresh token réussi');
     return response.data;
   }
 

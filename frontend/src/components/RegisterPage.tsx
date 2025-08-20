@@ -36,7 +36,7 @@ const RegisterPage: React.FC = () => {
       await register(username, email, password);
       navigate('/login');
     } catch (err: any) {
-      console.error('Erreur d\'inscription:', err);
+      
       
       if (err.response?.status === 400) {
         const errors = err.response.data;

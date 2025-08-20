@@ -20,7 +20,7 @@ const DashboardPage: React.FC = () => {
         const data = await apiService.getTeamCompositions();
         setCompositions(data);
       } catch (error) {
-        console.error('Erreur lors du chargement des compositions:', error);
+        // Error handling - user will see empty state
       } finally {
         setLoading(false);
       }
@@ -39,7 +39,7 @@ const DashboardPage: React.FC = () => {
       await apiService.deleteTeamComposition(compositionId);
       setCompositions(prev => prev.filter(comp => comp.id !== compositionId));
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      
       alert('Erreur lors de la suppression du schéma');
     } finally {
       setDeletingId(null);
@@ -58,7 +58,7 @@ const DashboardPage: React.FC = () => {
         ));
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du favori:', error);
+      
       alert('Erreur lors de la mise à jour du favori');
     } finally {
       setTogglingFavoriteId(null);
@@ -69,7 +69,7 @@ const DashboardPage: React.FC = () => {
     try {
       await PdfExportService.exportCompositionAsPdf(composition);
     } catch (error) {
-      console.error('Erreur lors de l\'export PDF:', error);
+      
       alert('Erreur lors de l\'export PDF');
     }
   };

@@ -57,6 +57,7 @@ namespace Footactique.Tests
             RegisterDto registerDto = new RegisterDto
             {
                 Email = "test@example.com",
+                Username = "testuser",
                 Password = "TestPassword123!"
             };
 
@@ -76,6 +77,7 @@ namespace Footactique.Tests
             RegisterDto registerDto = new RegisterDto
             {
                 Email = "duplicate@example.com",
+                Username = "testuser",
                 Password = "TestPassword123!"
             };
 
@@ -96,6 +98,7 @@ namespace Footactique.Tests
             RegisterDto registerDto = new RegisterDto
             {
                 Email = "login@example.com",
+                Username = "testuser",
                 Password = "TestPassword123!"
             };
             await _client.PostAsJsonAsync("/api/auth/register", registerDto);
@@ -140,6 +143,7 @@ namespace Footactique.Tests
             RegisterDto registerDto = new RegisterDto
             {
                 Email = "refresh@example.com",
+                Username = "testuser",
                 Password = "TestPassword123!"
             };
             await _client.PostAsJsonAsync("/api/auth/register", registerDto);
