@@ -1,0 +1,21 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "footactique": "Host=YOUR_PRODUCTION_DB_HOST;Port=5432;Database=footactique;Username=YOUR_DB_USER;Password=YOUR_DB_PASSWORD"
+  },
+  "AllowedOrigins": [
+    "https://your-production-domain.com",
+    "https://www.your-production-domain.com"
+  ],
+  "Jwt": {
+    "Key": "YOUR_STRONG_JWT_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS",
+    "Issuer": "Footactique"
+  }
+}
