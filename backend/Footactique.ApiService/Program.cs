@@ -2,6 +2,7 @@ using Footactique.Services;
 using Footactique.Services.Models;
 using Footactique.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -118,6 +119,25 @@ namespace Footactique.Api
             }
 
             WebApplication app = builder.Build();
+
+            // Respect reverse proxy headers (X-Forwarded-For / X-Forwarded-Proto)
+            // This prevents HTTPS redirect loops when running behind a TLS-terminating proxy like Caddy/Nginx
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                // Accept forwarded headers from any proxy in containerized environments
+                // by clearing the default KnownNetworks/Proxies restrictions
+                // (safe in single-tenant deployments where you control the network)
+                KnownNetworks = { },
+                KnownProxies = { }
+            });
+
+            // Apply any pending EF Core migrations automatically on startup
+            using (IServiceScope scope = app.Services.CreateScope())
+            {
+                ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
 
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())

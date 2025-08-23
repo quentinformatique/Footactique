@@ -1,0 +1,21 @@
+{
+    email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+    encode gzip zstd
+
+    # API reverse proxy
+    handle_path /api* {
+        reverse_proxy api:8080
+    }
+
+    # SPA static files
+    handle {
+        root * /usr/share/caddy
+        try_files {path} /index.html
+        file_server
+    }
+}
+
+

@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    container_name: footactique-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: footactique
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - web
+
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Footactique.ApiService/Dockerfile
+    container_name: footactique-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__footactique: Host=db;Port=5432;Database=footactique;Username=postgres;Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: Footactique
+    depends_on:
+      - db
+    networks:
+      - web
+
+  web:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+      args:
+        - REACT_APP_API_URL=/api
+    container_name: footactique-web
+    restart: unless-stopped
+    environment:
+      - DOMAIN=${DOMAIN}
+      - ACME_EMAIL=${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+    networks:
+      - web
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  web:
+    driver: bridge
+
+
