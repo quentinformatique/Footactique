@@ -5,8 +5,8 @@
 {$DOMAIN} {
     encode gzip zstd
 
-    # API reverse proxy
-    handle_path /api* {
+    # API reverse proxy (preserve /api prefix)
+    handle /api* {
         reverse_proxy api:8080
     }
 
