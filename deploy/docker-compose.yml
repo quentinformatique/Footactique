@@ -25,11 +25,8 @@ services:
       ConnectionStrings__footactique: Host=db;Port=5432;Database=footactique;Username=postgres;Password=${POSTGRES_PASSWORD}
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: Footactique
-      OTEL_SERVICE_NAME: footactique-api
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     depends_on:
       - db
-      - otel-collector
     networks:
       - web
 
@@ -55,112 +52,13 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
-  # --- Observability Stack (LGTM + OTel) ---
-  grafana:
-    image: grafana/grafana:11.1.3
-    container_name: footactique-grafana
-    restart: unless-stopped
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - web
-
-  loki:
-    image: grafana/loki:3.2.1
-    container_name: footactique-loki
-    command: ["-config.file=/etc/loki/local-config.yaml"]
-    restart: unless-stopped
-    volumes:
-      - loki_data:/loki
-      - ./observability/loki-config.yaml:/etc/loki/local-config.yaml:ro
-    networks:
-      - web
-
-  promtail:
-    image: grafana/promtail:3.2.1
-    container_name: footactique-promtail
-    command: ["-config.file=/etc/promtail/config.yml"]
-    restart: unless-stopped
-    volumes:
-      - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./observability/promtail-config.yml:/etc/promtail/config.yml:ro
-    networks:
-      - web
-    depends_on:
-      - loki
-
-  tempo:
-    image: grafana/tempo:2.6.0
-    container_name: footactique-tempo
-    command: ["-config.file=/etc/tempo/config.yaml"]
-    restart: unless-stopped
-    volumes:
-      - tempo_data:/var/tempo
-      - ./observability/tempo-config.yaml:/etc/tempo/config.yaml:ro
-    networks:
-      - web
-
-  prometheus:
-    image: prom/prometheus:v2.55.1
-    container_name: footactique-prometheus
-    restart: unless-stopped
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-    volumes:
-      - prometheus_data:/prometheus
-      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - web
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.2
-    container_name: footactique-cadvisor
-    restart: unless-stopped
-    privileged: true
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - web
-
-  node-exporter:
-    image: prom/node-exporter:v1.8.2
-    container_name: footactique-node-exporter
-    restart: unless-stopped
-    pid: host
-    network_mode: host
-    command:
-      - --path.rootfs=/host
-    volumes:
-      - /:/host:ro,rslave
-
-  otel-collector:
-    image: otel/opentelemetry-collector:0.109.0
-    container_name: footactique-otel-collector
-    restart: unless-stopped
-    command: ["--config=/etc/otel-collector-config.yml"]
-    volumes:
-      - ./observability/otel-collector-config.yml:/etc/otel-collector-config.yml:ro
-    networks:
-      - web
+  # Observability stack removed
 
 volumes:
   pgdata:
   caddy_data:
   caddy_config:
-  grafana_data:
-  loki_data:
-  tempo_data:
-  prometheus_data:
+  
 
 networks:
   web:

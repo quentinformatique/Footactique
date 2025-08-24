@@ -5,10 +5,7 @@
 {$DOMAIN} {
     encode gzip zstd
 
-    # Grafana UI (serve from subpath /grafana)
-    handle /grafana* {
-        reverse_proxy grafana:3000
-    }
+    # Monitoring route removed
 
     # API reverse proxy (preserve /api prefix)
     handle /api* {
