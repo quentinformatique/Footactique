@@ -27,12 +27,16 @@ jobs:
           script_stop: true
           script: |
             set -euo pipefail
+            USER_NAME=$(whoami)
+            # Ensure ownership to avoid git permission errors
+            sudo chown -R "$USER_NAME":"$USER_NAME" /opt/Footactique || true
+            git config --global --add safe.directory /opt/Footactique || true
             cd /opt/Footactique
             git fetch origin
             git reset --hard origin/main
             cd deploy
-            docker compose build --pull web api
-            docker compose up -d web api
-            docker compose ps
+            sudo docker compose build --pull web api
+            sudo docker compose up -d web api
+            sudo docker compose ps | cat
 
 
