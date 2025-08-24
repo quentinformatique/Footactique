@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 
 namespace Footactique.Api
 {
@@ -72,6 +75,34 @@ namespace Footactique.Api
             // Add MVC controllers
             builder.Services.AddControllers()
                 .AddApplicationPart(typeof(Program).Assembly);
+
+            // OpenTelemetry (traces + metrics)
+            string serviceName = builder.Configuration["OTEL_SERVICE_NAME"] ?? "footactique-api";
+            string otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? builder.Configuration["Otlp:Endpoint"] ?? "http://localhost:4317";
+
+            Action<ResourceBuilder> configureResource = r => r.AddService(serviceName)
+                                                               .AddTelemetrySdk()
+                                                               .AddAttributes(new[]
+                                                               {
+                                                                   new KeyValuePair<string, object>("deployment.environment", builder.Environment.EnvironmentName)
+                                                               });
+
+            builder.Services.AddOpenTelemetry()
+                .ConfigureResource(configureResource)
+                .WithTracing(tracing => tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otlpEndpoint);
+                    }))
+                .WithMetrics(metrics => metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otlpEndpoint);
+                    }));
 
             // Configure Swagger/OpenAPI
             builder.Services.AddEndpointsApiExplorer();
