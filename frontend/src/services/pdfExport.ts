@@ -85,78 +85,85 @@ function drawPlayers(doc: jsPDF, players: PlayerPosition[], pitch: { x: number; 
 
 export class PdfExportService {
   public static async exportCompositionAsPdf(composition: TeamComposition): Promise<void> {
-    // A4 in mm
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    // Page 1: Landscape full-pitch with players
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+    const landscapeWidth = doc.internal.pageSize.getWidth();
+    const landscapeHeight = doc.internal.pageSize.getHeight();
+    const margin = 8;
+
+    // Compute pitch to fill as much as possible with standard aspect 105x68
+    const pitchAspect = 105 / 68;
+    const availableWidth1 = landscapeWidth - margin * 2;
+    const availableHeight1 = landscapeHeight - margin * 2;
+    let pitchWidth1 = availableWidth1;
+    let pitchHeight1 = pitchWidth1 / pitchAspect;
+    if (pitchHeight1 > availableHeight1) {
+      pitchHeight1 = availableHeight1;
+      pitchWidth1 = pitchHeight1 * pitchAspect;
+    }
+    const pitchX1 = margin + (availableWidth1 - pitchWidth1) / 2;
+    const pitchY1 = margin + (availableHeight1 - pitchHeight1) / 2;
+
+    // Draw full pitch and players
+    drawPitch(doc, pitchX1, pitchY1, pitchWidth1, pitchHeight1);
+    drawPlayers(doc, composition.players || [], { x: pitchX1, y: pitchY1, w: pitchWidth1, h: pitchHeight1 });
+
+    // Small footer with title
+    doc.setTextColor(17, 24, 39);
+    doc.setFontSize(11);
+    const footerText = (composition.name || 'Schéma tactique');
+    doc.text(footerText, landscapeWidth / 2, landscapeHeight - 4, { align: 'center' as any });
+
+    // Page 2: Portrait with details (title, formation, description, players list)
+    doc.addPage('a4', 'portrait');
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 12;
+    const portraitMargin = 14;
 
-    // Header: title and meta
-    doc.setFontSize(18);
-    doc.setTextColor(17, 24, 39); // gray-900
-    doc.text(composition.name || 'Schéma tactique', margin, margin + 6);
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(17, 24, 39);
+    doc.text(composition.name || 'Schéma tactique', portraitMargin, portraitMargin + 6);
 
     doc.setFontSize(11);
-    doc.setTextColor(75, 85, 99); // gray-600
+    doc.setTextColor(75, 85, 99);
     const subtitleParts: string[] = [];
     if (composition.formation) {
       subtitleParts.push(`Formation: ${composition.formation}`);
     }
     const generatedAt = new Date().toLocaleString('fr-FR');
     subtitleParts.push(`Exporté: ${generatedAt}`);
-    doc.text(subtitleParts.join('  •  '), margin, margin + 14);
+    doc.text(subtitleParts.join('  •  '), portraitMargin, portraitMargin + 14);
 
-    // Description (if present)
-    let cursorY = margin + 22;
+    // Optional description
+    let cursorY = portraitMargin + 24;
     if (composition.description) {
       doc.setFontSize(11);
-      doc.setTextColor(31, 41, 55); // gray-800
-      const descriptionLines = doc.splitTextToSize(composition.description, pageWidth - margin * 2);
-      doc.text(descriptionLines, margin, cursorY);
-      cursorY += descriptionLines.length * 5 + 4;
-    }
-
-    // Pitch area calculation
-    const availableWidth = pageWidth - margin * 2;
-    const availableHeight = pageHeight - cursorY - margin - 70; // leave space for players list at bottom
-    const pitchAspect = 105 / 68; // standard football pitch
-    let pitchWidth = availableWidth;
-    let pitchHeight = pitchWidth / pitchAspect;
-    if (pitchHeight > availableHeight) {
-      pitchHeight = availableHeight;
-      pitchWidth = pitchHeight * pitchAspect;
-    }
-    const pitchX = margin + (availableWidth - pitchWidth) / 2;
-    const pitchY = cursorY;
-
-    // Draw pitch background rectangle in a faint green (underlay)
-    drawPitch(doc, pitchX, pitchY, pitchWidth, pitchHeight);
-
-    // Draw players on pitch
-    drawPlayers(doc, composition.players || [], { x: pitchX, y: pitchY, w: pitchWidth, h: pitchHeight });
-
-    // Section: Players list
-    let listY = pitchY + pitchHeight + 10;
-    if (listY < pageHeight - margin - 10) {
-      doc.setFontSize(14);
-      doc.setTextColor(17, 24, 39);
-      doc.text('Joueurs', margin, listY);
-      listY += 6;
-
-      doc.setFontSize(10);
       doc.setTextColor(31, 41, 55);
-      const lineHeight = 5;
-      const players = (composition.players || []).slice();
-      for (const player of players) {
-        const numberPart = player.number ? `#${player.number} ` : '';
-        const positionPart = player.position ? ` – ${player.position}` : '';
-        const row = `${numberPart}${player.playerName}${positionPart}`;
-        doc.text(row, margin, listY);
-        listY += lineHeight;
-        if (listY > pageHeight - margin) {
-          doc.addPage();
-          listY = margin;
-        }
+      const descriptionLines = doc.splitTextToSize(composition.description, pageWidth - portraitMargin * 2);
+      doc.text(descriptionLines, portraitMargin, cursorY);
+      cursorY += descriptionLines.length * 5 + 6;
+    }
+
+    // Players list
+    doc.setFontSize(14);
+    doc.setTextColor(17, 24, 39);
+    doc.text('Joueurs', portraitMargin, cursorY);
+    cursorY += 7;
+
+    doc.setFontSize(10);
+    doc.setTextColor(31, 41, 55);
+    const lineHeight = 5;
+    const players = (composition.players || []).slice();
+    for (const player of players) {
+      const numberPart = player.number ? `#${player.number} ` : '';
+      const positionPart = player.position ? ` – ${player.position}` : '';
+      const row = `${numberPart}${player.playerName}${positionPart}`;
+      doc.text(row, portraitMargin, cursorY);
+      cursorY += lineHeight;
+      if (cursorY > pageHeight - portraitMargin) {
+        doc.addPage('a4', 'portrait');
+        cursorY = portraitMargin;
       }
     }
 
