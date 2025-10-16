@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   db:
     image: postgres:16
@@ -13,6 +11,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - web
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   api:
     build:
@@ -22,13 +25,17 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:8080
       ConnectionStrings__footactique: Host=db;Port=5432;Database=footactique;Username=postgres;Password=${POSTGRES_PASSWORD}
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: Footactique
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - web
+    ports:
+      - "8080:8080"
 
   web:
     build:
@@ -38,30 +45,16 @@ services:
         - REACT_APP_API_URL=/api
     container_name: footactique-web
     restart: unless-stopped
-    environment:
-      - DOMAIN=${DOMAIN}
-      - ACME_EMAIL=${ACME_EMAIL}
-    ports:
-      - "80:80"
-      - "443:443"
     depends_on:
       - api
     networks:
       - web
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-
-  # Observability stack removed
+    ports:
+      - "3000:80" # front accessible localement si besoin
 
 volumes:
   pgdata:
-  caddy_data:
-  caddy_config:
-  
 
 networks:
   web:
     driver: bridge
-
-

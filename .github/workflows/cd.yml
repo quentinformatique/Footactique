@@ -1,13 +1,7 @@
 name: CD
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'deploy/**'
-      - '.github/workflows/**'
+  workflow_dispatch: # Manual trigger
 
 jobs:
   deploy:
