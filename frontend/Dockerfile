@@ -21,5 +21,3 @@ COPY deploy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /usr/share/caddy
 
 EXPOSE 80 443
-
-

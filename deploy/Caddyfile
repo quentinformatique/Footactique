@@ -1,23 +1,9 @@
-{
-    email {$ACME_EMAIL}
-}
-
-{$DOMAIN} {
+:80 {
+    root * /usr/share/caddy
     encode gzip zstd
 
-    # Monitoring route removed
+    # Pour React SPA : toutes les routes renvoient vers index.html
+    try_files {path} {path}/ /index.html
 
-    # API reverse proxy (preserve /api prefix)
-    handle /api* {
-        reverse_proxy api:8080
-    }
-
-    # SPA static files
-    handle {
-        root * /usr/share/caddy
-        try_files {path} /index.html
-        file_server
-    }
+    file_server
 }
-
-
